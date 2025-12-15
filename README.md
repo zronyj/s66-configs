@@ -32,10 +32,11 @@ After translating the trajectories into XYZ files, you may go to the `filtered` 
 
 You can change the parameters of the filter by editing the script. At the very end, there is a description of all the parameters that can be changed or selected. But please bear in mind that the *energy* method is quite fast compared to the *rmsd* method. The latter takes around 30 seconds per trajectory on a modern laptop.
 
-The unique configurations for each entry in the S66 database are, in this case, specific frames of each trajectory listed in each `filtered*.txt`.
+The unique configurations for each entry in the S66 database are, in this case, specific frames of each trajectory listed in each `filtered*.txt`. Each configuration will be also saved as an individual XYZ file with its S66 base name and the MD frame described in the `filtered*.txt` file.
 
 ## How to get the databases
 
-All the previous steps have been carried out successfully and packed in `*.tar.bz2` files in this repository.
-
-The last script, to extract these frames and save them as individual XYZ files will be included in here shortly.
+All the previous steps have been carried out successfully and packed in the `s66_filtered.tar.bz2` archive in this repository.
+The latter has both the `filtered*.txt` files and a single `configurations.tar.bz2` archive with the individual XYZ files.
+Both the trajectories + log files from the MD runs, and the aligned trajectories will not be included, since their sizes (even after compression) are too big for this repository.
+Thank you for understanding.

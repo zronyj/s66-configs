@@ -46,7 +46,7 @@ def single_atom_square_distance_matrix(universe, selection='all', atom = 0):
             atom_sq_dist_matrix[step_j, step_i] = sq_dist  # symmetry
     return atom_sq_dist_matrix
 
-class Structure_Filter:
+class StructureFilter:
     """
     Class for filtering structures based on RMSD or energy.
     
@@ -77,6 +77,7 @@ class Structure_Filter:
 
     def __init__(self, xyz_file, log_file, selection='all',
                  filter_method='rmsd',
+                 base_name="filtered_structures",
                  output_file="filtered_structures.txt",
                  similarity_png="rmsd_similarity.png",
                  energy_png="energy_distribution.png",
@@ -88,6 +89,7 @@ class Structure_Filter:
         self.log_file = log_file
         self.selection = selection
         self.filter_method = filter_method
+        self.base_name = base_name
         self.output_file = output_file
         self.similarity_png = similarity_png
         self.energy_png = energy_png
@@ -369,6 +371,20 @@ class Structure_Filter:
         fig.tight_layout()
         fig.savefig(self.similarity_png, dpi=300)
         plt.close(fig)
+    
+    def __save_individual_xyz(self, base_name : str, frame : str) -> None:
+        """
+        Save an individual XYZ file for a given frame.
+        
+        Parameters
+        ----------
+        base_name : str
+            Base name for the output file.
+        frame : str
+            Frame index.
+        """
+        self.universe.trajectory[int(frame)]
+        self.universe.select_atoms(self.selection).write(f"{base_name}_{frame}.xyz", overwrite=True)
 
     def run(self) -> None:
         """
@@ -403,7 +419,12 @@ class Structure_Filter:
 
         self.log += "Most unique structures (0-based indices):\n"
         for j, (i, s) in enumerate(zip(unique_idx, unique_scores)):
+
+            # Update log
             self.log += f"{j+1:>2})  frame {i:4d}  score = {s: .4f}  energy = {self.energies[i]: .6f}\n"
+
+            # Save individual XYZ files
+            self.__save_individual_xyz(base_name=self.base_name, frame=str(i))
         
         with open(self.output_file, 'w') as f:
             f.write(self.log)
@@ -423,10 +444,11 @@ if __name__ == "__main__":
     # Run structure filter
     for xyz, log in tqdm(zip(xyz_files, log_files), total=len(xyz_files)):
         base_name = log[:-7]
-        filter = Structure_Filter(os.path.join(here, '..', "aligned", xyz),     # Path of the XYZ trajectory
+        filter = StructureFilter(os.path.join(here, '..', "aligned", xyz),      # Path of the XYZ trajectory
                                   os.path.join(here, '..', "md", log),          # Path of the log file
                                   selection="all",                              # Atom selection (default: all)
                                   filter_method="energy",                       # Filter method (can be "rmsd" or "energy")
+                                  base_name=base_name,                          # Base name for output files
                                   output_file=f"filtered_{base_name}.txt",      # Path of the output file (the one with the results)
                                   similarity_png=f"similarity_{base_name}.png", # Path of the similarity matrix image, if 'rmsd' was selected as filter
                                   energy_png=f"energy_{base_name}.png",         # Path of the energy distribution image, if 'energy' was selected as filter
